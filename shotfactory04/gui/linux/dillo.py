@@ -30,4 +30,6 @@ class Gui(base.Gui):
     """
     Special functions for Dillo.
     """
+    def reset_browser(self):
+        1
     pass
