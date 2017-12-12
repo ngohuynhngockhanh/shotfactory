@@ -63,21 +63,7 @@ class Gui(base.Gui):
         self.shell('%s "%s" &' % (binary, url))
         time.sleep(5)
         self.firefox_bin = self.sysevents.processes['firefox-bin']
-        print "maximizing window"
-        retry = 3
-        while True:
-            try:
-                self.firefox_bin.frontmost.set(True)
-                self.window = self.firefox_bin.windows[1]
-                self.window.position.set((0, 22))
-                self.window.size.set((self.width, self.height - 26))
-                break
-            except (appscript.CommandError, AttributeError):
-                print "Firefox not ready, retrying in 10 seconds..."
-                time.sleep(10)
-                retry -= 1
-            if not retry:
-                raise RuntimeError("AppleScript for Firefox failed")
+        print "maximizing window"		
         time.sleep(options.wait)
         return True
 
@@ -94,4 +80,4 @@ class Gui(base.Gui):
     def close(self):
         """Close browser and helper programs."""
         base.Gui.close(self)
-        self.shell('killall firefox-bin > /dev/null 2>&1')
+        self.shell('sudo killall firefox > /dev/null 2>&1')

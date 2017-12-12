@@ -24,7 +24,7 @@ __author__ = "$Author: johann $"
 
 import os
 import time
-import appscript
+import appscript    
 import MacOS
 from shotfactory04.gui import darwin as base
 
@@ -64,39 +64,28 @@ class Gui(base.Gui):
         """
         Start browser and load website.
         """
+        print "ok3"
         try:
-            self.safari = appscript.app('Safari')
+            self.sysevents = appscript.app('System Events')
         except MacOS.Error, error:
             code, message = error
             raise RuntimeError(message)
-        self.js("window.moveTo(0,0)")
-        time.sleep(0.1)
-        self.js("window.resizeTo(screen.availWidth,screen.availHeight)")
-        time.sleep(0.1)
-        try:
-            self.safari.activate()
-        except:
-            raise RuntimeError("Could not activate Safari.")
-        time.sleep(0.1)
-        self.js("document.location='%s'" % url)
-        ready_count = 0
-        max_wait = time.time() + 60
-        while time.time() < max_wait:
-            time.sleep(1)
-            if self.ready_state():
-                ready_count += 1
-                print ready_count,
-                if ready_count >= MIN_WAIT:
-                    break
-            elif ready_count:
-                print 'still loading'
-                ready_count = 0
-        if ready_count >= MIN_WAIT:
-            print 'done'
-        elif ready_count:
-            print 'timeout'
+        if not self.sysevents.UI_elements_enabled():
+            print "Please enable access for assistive devices"
+            print "in System Preferences -> Universal Access"
+            print "http://www.apple.com/applescript/uiscripting/01.html"
+            raise RuntimeError("AppleScript for UI elements not enabled")
+        binary = '/Applications/Safari.app/Contents/MacOS/Safari'
+        #self.shell('%s "%s" &' % (binary, url))
+        print "ok2"
+        command = "sudo %s & sleep 1 && osascript -e 'tell application \"Safari\" to open location \"%s\"' &" % (binary, url)
+        print command
+        self.shell(command)		
+        print "ok"
+        time.sleep(options.wait)
+        
         return True
-
+        
     def ready_state(self):
         """Get progress indicator."""
         state = self.js("document.readyState")
@@ -114,4 +103,4 @@ class Gui(base.Gui):
     def close(self):
         """Close Safari."""
         base.Gui.close(self)
-        self.shell('killall Safari > /dev/null 2>&1')
+        self.shell('sudo killall Safari > /dev/null 2>&1')
